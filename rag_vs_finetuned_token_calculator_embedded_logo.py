@@ -11,7 +11,7 @@ def get_logo_html():
 #st.markdown(get_logo_html(), unsafe_allow_html=True)
 st.title("RAG vs Fine-Tuned LLM Token Cost Calculator")
 
-st.markdown("Use this tool to estimate and compare token costs for Retrieval-Augmented Generation (RAG) and Fine-Tuned LLM deployments in enterprise use cases.")
+st.markdown("Use this tool to estimate and compare token costs for Retrieval-Augmented Generation (RAG), Fine-Tuned LLMs, and a Hybrid deployment in enterprise settings.")
 
 # Token cost database for popular models
 model_costs = {
@@ -60,28 +60,34 @@ rag_output_tokens = st.sidebar.number_input("RAG Output Tokens", min_value=0, va
 ft_input_tokens = st.sidebar.number_input("Fine-Tuned Input Tokens", min_value=0, value=800, step=100)
 ft_output_tokens = st.sidebar.number_input("Fine-Tuned Output Tokens", min_value=0, value=300, step=50)
 
+st.sidebar.subheader("🧪 Hybrid Ratio")
+rag_percent = st.sidebar.slider("RAG Usage (%)", 0, 100, 20, step=5)
+ft_percent = 100 - rag_percent
+
+# Cost calculations
 rag_cost_per_query = ((rag_input_tokens / 1000) * input_cost) + ((rag_output_tokens / 1000) * output_cost)
 ft_cost_per_query = ((ft_input_tokens / 1000) * input_cost) + ((ft_output_tokens / 1000) * output_cost)
 
-rag_monthly_cost = rag_cost_per_query * queries
+rag_monthly_cost = rag_cost_per_query * queries 
 ft_monthly_cost = ft_cost_per_query * queries
-savings = rag_monthly_cost - ft_monthly_cost
+hybrid_monthly_cost = rag_monthly_cost * (rag_percent / 100) + ft_monthly_cost * (ft_percent / 100)
 
 st.subheader("📊 Monthly Cost Comparison")
-st.metric("RAG Estimated Monthly Cost", f"${rag_monthly_cost:,.2f}")
-st.metric("Fine-Tuned Estimated Monthly Cost", f"${ft_monthly_cost:,.2f}")
-st.metric("Estimated Monthly Savings", f"${savings:,.2f}")
+st.metric("RAG Monthly Cost", f"${rag_monthly_cost:,.2f}")
+st.metric("Fine-Tuned Monthly Cost", f"${ft_monthly_cost:,.2f}")
+st.metric("Hybrid Monthly Cost", f"${hybrid_monthly_cost:,.2f}")
 
+# Bar chart
 st.subheader("📉 Visual Comparison")
 cost_data = pd.DataFrame({
-    "Approach": ["RAG", "Fine-Tuned"],
-    "Monthly Cost ($)": [rag_monthly_cost, ft_monthly_cost]
+    "Approach": ["RAG", "Fine-Tuned", "Hybrid"],
+    "Monthly Cost ($)": [rag_monthly_cost, ft_monthly_cost, hybrid_monthly_cost]
 })
 st.bar_chart(cost_data.set_index("Approach"))
 
 st.markdown("---")
-st.markdown("Adjust parameters to reflect your real-world scenario and share with clients to demonstrate potential token cost savings using fine-tuned models.")
+st.markdown("Use the slider to model a hybrid deployment strategy. This helps balance cost and capability by routing some queries through a fine-tuned model and others through a RAG pipeline.")
 
 # Legal disclaimer
 st.markdown("---")
-st.markdown("©This tool is provided for informational purposes only and does not constitute a commercial offer or technical guarantee. Cost estimates are based on user inputs and public model pricing as of the current date.")
+st.markdown("© CGI Inc. This tool is provided for informational purposes only and does not constitute a commercial offer or technical guarantee. Cost estimates are based on user inputs and public model pricing as of the current date.")
