@@ -85,6 +85,22 @@ cost_data = pd.DataFrame({
 })
 st.bar_chart(cost_data.set_index("Approach"))
 
+# 5-Year Projection Chart
+st.subheader("📈 5-Year Total Cost Projection")
+years = [f"Year {i}" for i in range(1, 6)]
+rag_5yr = [rag_monthly_cost * 12 * i for i in range(1, 6)]
+ft_5yr = [ft_monthly_cost * 12 * i for i in range(1, 6)]
+hybrid_5yr = [hybrid_monthly_cost * 12 * i for i in range(1, 6)]
+
+projection_df = pd.DataFrame({
+    "Year": years,
+    "RAG": rag_5yr,
+    "Fine-Tuned": ft_5yr,
+    "Hybrid": hybrid_5yr
+})
+projection_df = projection_df.set_index("Year")
+st.line_chart(projection_df)
+
 st.markdown("---")
 st.markdown("Use the slider to model a hybrid deployment strategy. This helps balance cost and capability by routing some queries through a fine-tuned model and others through a RAG pipeline.")
 
